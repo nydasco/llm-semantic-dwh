@@ -11,14 +11,27 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=dwh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s  
     networks:
       dwh_network:
         ipv4_address: 10.5.0.5
 
-  python:
-    image: llm-semantic-dwh-python
+  dwh-init:
+    image: dwh-init
     volumes:
       - ./python:/usr/src/app
+      - ./data:/usr/src/data
+    command: bash -c "python /usr/src/app/load_dwh.py"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links: 
+        - postgres
     networks:
       - dwh_network
 

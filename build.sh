@@ -1,1 +1,5 @@
-docker build -t llm-semantic-dwh-python . -f DockerFile
+#!/bin/bash
+
+cd build/init
+
+docker build -t dwh-init . -f DockerFile
