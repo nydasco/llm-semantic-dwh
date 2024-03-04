@@ -25,33 +25,32 @@ cur = conn.cursor()
 # Set automatic commit to be true, so that each action is committed without having to call conn.committ() after each command
 conn.set_session(autocommit=True)
 
-# Create the 'dwh' database
-cur.execute("CREATE DATABASE dwh")
+try:
+    db_params['database'] = 'dwh'
+    cur.execute("SELECT * FROM nsw_property_data")
 
-# Commit the changes and close the connection to the default database
-conn.commit()
-cur.close()
-conn.close()
+    # Close the connection to the default database
+    cur.close()
+    conn.close()
 
-# Connect to the 'dwh' database
-db_params['database'] = 'dwh'
-engine = create_engine(f'postgresql://{db_params["user"]}:{db_params["password"]}@{db_params["host"]}/{db_params["database"]}')
+    print('Database Already Exists!')
+except:
+    # Create the 'dwh' database
+    cur.execute("CREATE DATABASE dwh")
 
-# Define the file paths for your CSV files
-csv_files = {
-    'nsw_property_data': '/usr/src/data/nsw_property_data.csv',
-    'nsw_property_archived_data': '/usr/src/data/nsw_property_archived_data.csv'
-}
+    # Close the connection to the default database
+    cur.close()
+    conn.close()
 
-# Load and display the contents of each CSV file to check
-for table_name, file_path in csv_files.items():
-    print(f"Contents of '{table_name}' CSV file:")
-    df = pd.read_csv(file_path)
-    print(df.head(2))  # Display the first few rows of the DataFrame
-    print("\n")
+    print('Database Created!')
 
-# Loop through the CSV files and import them into PostgreSQL
-for table_name, file_path in csv_files.items():
-    df = pd.read_csv(file_path)
-    df.to_sql(table_name, engine, if_exists='replace', index=False)
-    print(f'{table_name} load complete!')
+    # Connect to the 'dwh' database
+    db_params['database'] = 'dwh'
+    engine = create_engine(f'postgresql://{db_params["user"]}:{db_params["password"]}@{db_params["host"]}/{db_params["database"]}')
+
+    df = pd.read_csv('/usr/src/data/nsw_property_data.csv')
+    print(df.head())
+
+    df.to_sql('nsw_property_data', engine, if_exists='replace', index=False, chunksize=5000)
+
+    print('Done')
