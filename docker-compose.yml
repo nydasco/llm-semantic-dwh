@@ -28,11 +28,11 @@ services:
       - ./python:/usr/src/app
       - ./data:/usr/src/data
     command: bash -c "python /usr/src/app/load_dwh.py"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    links: 
-        - postgres
+    #depends_on:
+    #  postgres:
+    #    condition: service_healthy
+    #links: 
+    #    - postgres
     networks:
       - dwh_network
 
