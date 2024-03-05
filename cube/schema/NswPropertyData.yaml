@@ -1,0 +1,57 @@
+cubes:
+  - name: NswPropertyData
+    sql: SELECT * FROM public.nsw_property_data
+    public: true
+
+    joins: []
+    measures:
+      - name: count
+        type: count
+        drillMembers: [areaType, primaryPurpose, councilName, settlementDate]
+
+      - name: purchasePrice
+        sql: purchase_price
+        type: sum
+
+      - name: averagePurchasePrice
+        sql: "{purchasePrice} / {count}"
+        type: number
+
+    dimensions:
+      - name: strataLotNumber
+        sql: strata_lot_number
+        type: string
+      - name: address
+        sql: address
+        type: string
+
+      - name: areaType
+        sql: area_type
+        type: string
+      - name: propertyType
+        sql: property_type
+        type: string
+      - name: natureOfProperty
+        sql: nature_of_property
+        type: string
+      - name: primaryPurpose
+        sql: primary_purpose
+        type: string
+
+      - name: councilName
+        sql: council_name
+        type: string
+
+      - name: settlementDate
+        sql: settlement_date
+        type: time
+
+    dataSource: default
+
+views:
+  - name: Settlements
+    includes:
+      - NswPropertyData.count
+      - NswPropertyData.primaryPurpose
+      - NswPropertyData.settlementDate
+      - NswPropertyData.purchasePrice

@@ -28,11 +28,11 @@ services:
       - ./python:/usr/src/app
       - ./data:/usr/src/data
     command: bash -c "python /usr/src/app/load_dwh.py"
-    #depends_on:
-    #  postgres:
-    #    condition: service_healthy
-    #links: 
-    #    - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links: 
+        - postgres
     networks:
       - dwh_network
 
@@ -45,8 +45,26 @@ services:
       - CUBEJS_DEV_MODE=true
     volumes:
       - ./cube:/cube/conf
+    depends_on:
+      dwh-init:
+        condition: service_completed_successfully
     networks:
-      - dwh_network
+      dwh_network:
+        ipv4_address: 10.5.0.6
+
+  dwh-llm:
+    image: dwh-llm
+    volumes:
+      - ./python:/usr/src/app
+    command: bash -c "python /usr/src/app/run_llm.py"
+    depends_on:
+      cube:
+        condition: service_healthy
+    links: 
+        - cube
+    networks:
+      dwh_network:
+        ipv4_address: 10.5.0.7
 
 networks:
   dwh_network:
